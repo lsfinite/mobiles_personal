@@ -1,8 +1,19 @@
-package co.edu.unal.tictactoe;
+package co.edu.unal.tictactoe.edu.harding;
 
+
+/* TicTacToeConsole.java
+ * By Frank McCown (Harding University)
+ *
+ * This is a tic-tac-toe game that runs in the console window.  The human
+ * is X and the computer is O.
+ */
+
+import java.util.InputMismatchException;
 import java.util.Random;
+import java.util.Scanner;
 
 public class TicTacToeGame {
+
     public static int BOARD_SIZE = 9;
 
     public static final char HUMAN_PLAYER = 'X';
@@ -11,9 +22,6 @@ public class TicTacToeGame {
 
     public char mBoard[] = {OPEN_SPOT,OPEN_SPOT,OPEN_SPOT,OPEN_SPOT,OPEN_SPOT,OPEN_SPOT,OPEN_SPOT,OPEN_SPOT,OPEN_SPOT};
 
-    public enum DifficultyLevel{Easy,Harder,Expert}
-
-    private DifficultyLevel mDifficultyLevel = DifficultyLevel.Expert;
     private Random mRand;
 
     public TicTacToeGame() {
@@ -94,24 +102,24 @@ public class TicTacToeGame {
         return;
     }
 
-    public int getWinningMove(){
+    public int getComputerMove()
+    {
+        int move;
+
+        // First see if there's a move O can make to win
         for (int i = 0; i < BOARD_SIZE; i++) {
-            if (mBoard[i] != HUMAN_PLAYER && mBoard[i] != COMPUTER_PLAYER) {
-                char curr = mBoard[i];
+            if (mBoard[i] == OPEN_SPOT) {
+                //char curr = mBoard[i];
                 mBoard[i] = COMPUTER_PLAYER;
                 if (checkForWinner() == 3) {
                     //System.out.println("Computer is moving to " + (i + 1));
-                    mBoard[i] = OPEN_SPOT;
                     return i;
                 }
                 mBoard[i] = OPEN_SPOT;
             }
         }
-        return -1;
 
-    }
-
-    public int getBlockingMove(){
+        // See if there's a move O can make to block X from winning
         for (int i = 0; i < BOARD_SIZE; i++) {
             if (mBoard[i] != HUMAN_PLAYER && mBoard[i] != COMPUTER_PLAYER) {
                 //char curr = mBoard[i];   // Save the current number
@@ -119,52 +127,22 @@ public class TicTacToeGame {
                 if (checkForWinner() == 2) {
                     //mBoard[i] = COMPUTER_PLAYER;
                     //System.out.println("Computer is moving to " + (i + 1));
-                    mBoard[i] = OPEN_SPOT;
                     return i;
                 }
                 mBoard[i] = OPEN_SPOT;
             }
         }
-        return -1;
-    }
 
-    public int getRandomMove(){
-        int move = -1;
+        // Generate random move
         do
         {
             move = mRand.nextInt(BOARD_SIZE);
         } while (mBoard[move] == HUMAN_PLAYER || mBoard[move] == COMPUTER_PLAYER);
+
+        return move ;
+        //System.out.println("Computer is moving to " + (move + 1));
+
         //mBoard[move] = COMPUTER_PLAYER;
-        return move ;
     }
 
-    public int getComputerMove()
-    {
-        int move = -1;
-
-        if (mDifficultyLevel == DifficultyLevel.Easy){
-            move = getRandomMove();
-        }
-        else if (mDifficultyLevel == DifficultyLevel.Harder){
-            move = getWinningMove();
-            if (move == -1)
-                move = getRandomMove();
-        }
-        else if (mDifficultyLevel == DifficultyLevel.Expert){
-            move = getWinningMove();
-            if (move == -1)
-                move = getBlockingMove();
-            if (move == -1)
-                move = getRandomMove();
-        }
-        return move ;
-    }
-
-    public DifficultyLevel getDifficultyLevel(){
-        return mDifficultyLevel;
-    }
-
-    public void setDifficultyLevel (DifficultyLevel difficultyLevel){
-        mDifficultyLevel = difficultyLevel;
-    }
 }

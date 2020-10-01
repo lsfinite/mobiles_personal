@@ -88,11 +88,10 @@ public class TicTacToeGame {
         }
     }
 
-    public boolean setMove(char player, int location){
-        if (mBoard[location] == OPEN_SPOT){
+    public void setMove(char player, int location){
+        if (mBoard[location] == OPEN_SPOT)
             mBoard[location] = player;
-            return true ;}
-        return false;
+        return;
     }
 
     public int getWinningMove(){
@@ -167,11 +166,5 @@ public class TicTacToeGame {
 
     public void setDifficultyLevel (DifficultyLevel difficultyLevel){
         mDifficultyLevel = difficultyLevel;
-    }
-
-
-    public char getBoardOccupant(int i ){
-        char occupant = mBoard[i] ;
-        return occupant ;
     }
 }

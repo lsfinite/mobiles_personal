@@ -174,7 +174,9 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
             int col = (int) event.getX() / mBoardView.getBoardCellWidth();
             int row = (int) event.getY() / mBoardView.getBoardCellHeight();
             int pos = row * 3 + col;
-            
+            if (!mHumanTurn){
+                return false; 
+            }
             if (!mGameOver && setMove(TicTacToeGame.HUMAN_PLAYER, pos))	{
                 mHumanMediaPlayer.start();
                 if (mGameOver){

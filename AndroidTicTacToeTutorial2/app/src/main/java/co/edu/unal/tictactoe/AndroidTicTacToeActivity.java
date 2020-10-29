@@ -1,5 +1,6 @@
 package co.edu.unal.tictactoe;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
@@ -21,7 +22,17 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.sql.SQLOutput;
 import java.text.BreakIterator;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 public class AndroidTicTacToeActivity extends AppCompatActivity {
@@ -36,6 +47,15 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
     private int mCountHuman = 0;
     private int mCountAndroid = 0 ;
 //    static final int DIALOG_DIFFICULTY_ID = 0 ;
+
+    DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+//    FirebaseDatabase mDatabase = FirebaseDatabase.getInstance();
+//    DatabaseReference myRef = mDatabase.getReference("message-test");
+
+
+
+
+
     static final int DIALOG_QUIT_ID = 1 ;
     private BoardView mBoardView;
     String msg = " ";
@@ -52,6 +72,7 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mDatabase.addValueEventListener(postListener);
 
 
         mInfoTextView = (TextView) findViewById(R.id.information);
@@ -85,6 +106,7 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
 
         // Listen for touches on the board
         mBoardView.setOnTouchListener(mTouchListener);
+
 
         return true;
     }
@@ -167,6 +189,7 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
         mGameOver = false;
         mGame.clearBoard();
         mBoardView.invalidate();
+        mDatabase.removeValue();
         if( mHumanStart){
             mInfoTextView.setText(R.string.first_human);
             mHumanStart = false;
@@ -178,10 +201,35 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
             mInfoTextView.setText((R.string.first_android));
             int move = mGame.getComputerMove();
             setMove(TicTacToeGame.COMPUTER_PLAYER,move);
-
+            mDatabase.child("player2").child(Integer.toString(move)).setValue(0);
         }
     }
 
+    ValueEventListener postListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            // Get Post object and use the values to update the UI
+            int i = 0 ;
+            for (DataSnapshot keyNode : dataSnapshot.getChildren()){
+                i ++;
+                System.out.println("ayudita "+ Integer.toString(i));
+                System.out.println((String) keyNode.getKey());
+                for (DataSnapshot move: keyNode.getChildren()){
+                    System.out.println("movement " + move.getKey());
+                    Long winn = move.getValue(Long.class);
+                }
+                System.out.println("*******************");
+            }
+            System.out.println("---------------------");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            // Getting Post failed, log a message
+            Log.w("upsi", "loadPost:onCancelled", databaseError.toException());
+            // ...
+        }
+    };
     // Listen for touches on the board
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
@@ -190,8 +238,13 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
             int row = (int) event.getY() / mBoardView.getBoardCellHeight();
             int pos = row * 3 + col;
             if (!mHumanTurn){
-                return false; 
+                return false;
             }
+
+//            Log.i("this is a test", "this is a test");
+
+            String movement = new String(Integer.toString(col) + '_'+ Integer.toString(row));
+
             if (!mGameOver && setMove(TicTacToeGame.HUMAN_PLAYER, pos))	{
                 if (mSoundOn)
                     mHumanMediaPlayer.start();
@@ -207,6 +260,7 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
                                     if (mSoundOn)
                                         mComputerMediaPlayer.start();
                                     int move = mGame.getComputerMove();
+                                    mDatabase.child("player2").child(Integer.toString(move)).setValue(0);
                                     setMove(TicTacToeGame.COMPUTER_PLAYER,move);
                                     int winner = mGame.checkForWinner() ;
                                     if (winner == 3) {
@@ -217,15 +271,13 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
                                         mInfoTextView.setText(R.string.result_tie);
                                         mGameOver = true ;
                                     }
+
                                 }
                             }, 2000);
                 } else if (winner == 2 ){
                     mInfoTextView.setText(R.string.result_human_wins);
                     mCountHuman += 1 ;
                     mGameOver = true ;
-
-
-//                    mHumanScoreTextView.setText(Integer.toString(mHumanWins));
                     String defaultMessage = getResources().getString(R.string.result_human_wins);
                     mInfoTextView.setText(mPrefs.getString("victory_message", defaultMessage));
 
@@ -233,11 +285,13 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
                     mInfoTextView.setText(R.string.result_tie);
                     mGameOver = true ;
                 }
+                mDatabase.child("player1").child(Integer.toString(pos)).setValue(winner);
             }
 
             return false;
         }
     };
+
 
 
     private boolean setMove(char player, int location) {

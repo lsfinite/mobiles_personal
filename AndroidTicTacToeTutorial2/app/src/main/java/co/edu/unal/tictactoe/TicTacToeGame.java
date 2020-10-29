@@ -89,7 +89,7 @@ public class TicTacToeGame {
     }
 
     public boolean setMove(char player, int location){
-        if (mBoard[location] == OPEN_SPOT){
+        if (mBoard[location] == OPEN_SPOT || mBoard[location] == player){
             mBoard[location] = player;
             return true ;}
         return false;

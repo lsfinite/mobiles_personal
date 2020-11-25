@@ -109,13 +109,49 @@ public class DBHelper extends SQLiteOpenHelper{
             query += "classification like '%" + classification + "%' ";
          }
       }
+      Log.i("DB HELPER",query);
       Cursor res =  db.rawQuery( query , null );
       res.moveToFirst();
 
       while(res.isAfterLast() == false){
-         array_list.add(res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME)));
+         String return_name = res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME));
+         String return_id = res.getString(res.getColumnIndex(CONTACTS_COLUMN_ID));
+         array_list.add(return_name);
          res.moveToNext();
       }
       return array_list;
    }
+
+   public ArrayList<String> getAllContactsIds(String name, String classification) {
+      ArrayList<String> array_list = new ArrayList<String>();
+      //hp = new HashMap();
+      SQLiteDatabase db = this.getReadableDatabase();
+      String query = "select * from contacts " ;
+      boolean has_name = false;
+      if (name.length() > 0 || classification.length() > 0){
+         query += "where ";
+         if (name.length()>0){
+            query += "name like '%" + name + "%' ";
+            has_name = true;
+         }
+         if (classification.length()>0){
+            if (has_name){
+               query += "and ";
+            }
+            query += "classification like '%" + classification + "%' ";
+         }
+      }
+      Log.i("DB HELPER",query);
+      Cursor res =  db.rawQuery( query , null );
+      res.moveToFirst();
+
+      while(res.isAfterLast() == false){
+         String return_name = res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME));
+         String return_id = res.getString(res.getColumnIndex(CONTACTS_COLUMN_ID));
+         array_list.add(return_id);
+         res.moveToNext();
+      }
+      return array_list;
+   }
+
 }

@@ -40,7 +40,10 @@ public class MainActivity extends AppCompatActivity {
     protected void showRegisters(String name, String classification){
         mydb = new DBHelper(this);
         ArrayList array_list = mydb.getAllContacts(name, classification);
-
+        ArrayList array_list_ids = mydb.getAllContactsIds(name,classification);
+        for (int counter = 0 ; counter < array_list.size(); counter ++){
+            System.out.println(array_list.get(counter));
+        }
         ArrayAdapter arrayAdapter = new ArrayAdapter(this,android.R.layout.simple_list_item_1, array_list);
 
         obj = (ListView)findViewById(R.id.listView1);
@@ -50,11 +53,14 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,long arg3) {
                 // TODO Auto-generated method stub
                 int id_To_Search = arg2 + 1;
-                System.out.println("The id is " + Integer.toString(id_To_Search));
+//                System.out.println("The id is " + Integer.toString((Integer) array_list_ids.get(arg2)));
+                String retrieve_id = (String) array_list_ids.get(arg2);
+                System.out.println("The id is " + array_list_ids.get(arg2));
+                System.out.println("the elements is: " + array_list.get(arg2));
 
 
                 Bundle dataBundle = new Bundle();
-                dataBundle.putInt("id", id_To_Search);
+                dataBundle.putInt("id", Integer.parseInt(retrieve_id));
 
                 Intent intent = new Intent(getApplicationContext(),DisplayContact.class);
 
